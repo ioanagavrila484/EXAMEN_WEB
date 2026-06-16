@@ -1,0 +1,6 @@
+@EXAMEN_WEB_ASP.Server_HostAddress = http://localhost:5016
+
+GET {{EXAMEN_WEB_ASP.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
