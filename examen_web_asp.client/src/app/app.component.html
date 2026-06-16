@@ -1,0 +1,74 @@
+<h1>🔐 Login Examen</h1>
+
+<!-- ============ FORMULAR DE LOGIN (se vede doar cand NU esti logat) ============ -->
+<div class="login-container" *ngIf="!loggedInUser">
+  <h2>Login</h2>
+
+  <!-- (ngSubmit) apeleaza metoda login() din app.component.ts -->
+  <form (ngSubmit)="login()">
+    <div class="form-group">
+      <label for="username">Nume utilizator</label>
+      <!-- [(ngModel)] leaga input-ul de proprietatea 'username' din .ts -->
+      <input id="username"
+             name="username"
+             type="text"
+             placeholder="Introdu numele (ex: Ioana Gavrila)"
+             [(ngModel)]="username"
+             required />
+    </div>
+
+    <button type="submit" class="btn btn-primary">Login</button>
+  </form>
+
+  <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
+</div>
+
+<!-- ============ DUPA LOGIN (se vede doar cand esti logat) ============ -->
+<div class="dashboard" *ngIf="loggedInUser">
+  <p>👋 Bun venit, <strong>{{ loggedInUser.userName }}</strong> (ID: {{ loggedInUser.id }})</p>
+</div>
+
+<!--
+=====================================================================
+  SINTEZA LEGATURA FE <-> BE (HTML)
+=====================================================================
+  - HTML-ul se ocupa doar de:
+        1) AFISARE date venite din BE  -> *ngFor / interpolare {{ }}
+        2) FORMULARE care trimit date  -> (ngSubmit) + [(ngModel)]
+  - Ca [(ngModel)] sa mearga, FormsModule trebuie importat in app.module.ts.
+
+  ---- TEMPLATE GET (afisare lista in TABEL) ------------------------
+  (in .ts ai nevoie de:  utilizatori: any[] = []  si metoda getUtilizatori())
+
+  <button class="btn btn-primary" (click)="getUtilizatori()">Incarca utilizatori</button>
+
+  <table>
+    <thead>
+      <tr>
+        <th>Id</th>
+        <th>Nume</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr *ngFor="let u of utilizatori">
+        <td>{{ u.id }}</td>
+        <td>{{ u.userName }}</td>
+      </tr>
+    </tbody>
+  </table>
+
+  ---- TEMPLATE POST (formular de adaugare) -------------------------
+  <form (ngSubmit)="createUser()">
+    <input name="userName" [(ngModel)]="newUser.userName" placeholder="Nume nou" required />
+    <button type="submit" class="btn btn-primary">Adauga</button>
+  </form>
+
+  ---- TEMPLATE PUT (formular de update dupa Id) --------------------
+  <form (ngSubmit)="updateUser()">
+    <input name="id" type="number" [(ngModel)]="editUser.id" placeholder="Id" />
+    <input name="userName" [(ngModel)]="editUser.userName" placeholder="Nume nou" />
+    <button type="submit" class="btn btn-primary">Salveaza</button>
+  </form>
+=====================================================================
+-->
+
