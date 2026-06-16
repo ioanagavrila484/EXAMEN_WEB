@@ -1,0 +1,7 @@
+<Solution>
+  <Project Path="examen_web_asp.client/examen_web_asp.client.esproj">
+    <Build />
+    <Deploy />
+  </Project>
+  <Project Path="EXAMEN_WEB_ASP.Server/EXAMEN_WEB_ASP.Server.csproj" />
+</Solution>
