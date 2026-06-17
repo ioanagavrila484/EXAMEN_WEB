@@ -15,8 +15,7 @@ namespace EXAMEN_WEB_ASP.Server.Data
             _connectionString = configuration.GetConnectionString("DefaultConnection")!;
         }
 
-        // ====================== LOGIN ======================
-        // Cauta un utilizator dupa UserName. Daca exista -> il intoarce, altfel -> null.
+
         public async Task<Utilizator?> LoginAsync(string userName)
         {
             const string sql =
