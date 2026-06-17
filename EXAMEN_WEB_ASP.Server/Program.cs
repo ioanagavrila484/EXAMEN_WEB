@@ -5,6 +5,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Inregistram Repo-ul ca sa poata fi injectat in controller (constructor).
 builder.Services.AddScoped<EXAMEN_WEB_ASP.Server.Data.UtilizatorRepo>();
+builder.Services.AddScoped<EXAMEN_WEB_ASP.Server.Data.IngredientRepo>();
+builder.Services.AddScoped<EXAMEN_WEB_ASP.Server.Data.RecipeRepo>();
+builder.Services.AddScoped<EXAMEN_WEB_ASP.Server.Data.RecipeStepRepo>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

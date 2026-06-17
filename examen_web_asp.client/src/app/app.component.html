@@ -1,74 +1,120 @@
-<h1>Login Examen</h1>
+<h1>Recipe Builder</h1>
 
-<!-- ============ FORMULAR DE LOGIN (se vede doar cand NU esti logat) ============ -->
-<div class="login-container" *ngIf="!loggedInUser">
+<!-- ===== PAGE 0: LOGIN ===== -->
+<div class="login-container" *ngIf="currentPage === 0">
   <h2>Login</h2>
-
-  <!-- (ngSubmit) apeleaza metoda login() din app.component.ts -->
   <form (ngSubmit)="login()">
     <div class="form-group">
       <label for="username">Nume utilizator</label>
-      <!-- [(ngModel)] leaga input-ul de proprietatea 'username' din .ts -->
       <input id="username"
              name="username"
              type="text"
-             placeholder="Introdu numele (ex: Ioana Gavrila)"
+             placeholder="ex: Ioana Gavrila"
              [(ngModel)]="username"
              required />
     </div>
-
     <button type="submit" class="btn btn-primary">Login</button>
   </form>
-
   <p class="error" *ngIf="errorMessage">{{ errorMessage }}</p>
 </div>
 
-<!-- ============ DUPA LOGIN (se vede doar cand esti logat) ============ -->
-<div class="dashboard" *ngIf="loggedInUser">
-  <p>Bun venit, <strong>{{ loggedInUser.userName }}</strong> (ID: {{ loggedInUser.id }})</p>
+<!-- ===== PAGE 1: TITLU RETETA ===== -->
+<div class="dashboard" *ngIf="currentPage === 1">
+  <p>Bun venit, <strong>{{ loggedInUser?.userName }}</strong></p>
+  <h2>Pagina 1: Titlu reteta</h2>
+  <div class="form-group">
+    <label for="recipeTitle">Titlu</label>
+    <input id="recipeTitle"
+           name="recipeTitle"
+           type="text"
+           placeholder="Introdu titlul retetei"
+           [(ngModel)]="recipeTitle" />
+  </div>
+  <button class="btn btn-primary" (click)="goToStepBuilder()" [disabled]="!recipeTitle.trim()">Next</button>
 </div>
 
-<!--
-=====================================================================
-  SINTEZA LEGATURA FE <-> BE (HTML)
-=====================================================================
-  - HTML-ul se ocupa doar de:
-        1) AFISARE date venite din BE  -> *ngFor / interpolare {{ }}
-        2) FORMULARE care trimit date  -> (ngSubmit) + [(ngModel)]
-  - Ca [(ngModel)] sa mearga, FormsModule trebuie importat in app.module.ts.
+<!-- ===== PAGE 2: STEP BUILDER ===== -->
+<div class="dashboard" *ngIf="currentPage === 2">
+  <p>Bun venit, <strong>{{ loggedInUser?.userName }}</strong> | Reteta: <strong>{{ recipeTitle }}</strong></p>
+  <h2>Pagina 2: Adauga pasi</h2>
 
-  ---- TEMPLATE GET (afisare lista in TABEL) ------------------------
-  (in .ts ai nevoie de:  utilizatori: any[] = []  si metoda getUtilizatori())
+  <div class="form-group">
+    <label>Descriere pas:</label>
+    <input name="stepDescription"
+           type="text"
+           placeholder="Descriere pas"
+           [(ngModel)]="stepDescription" />
+  </div>
 
-  <button class="btn btn-primary" (click)="getUtilizatori()">Incarca utilizatori</button>
+  <div class="form-group">
+    <label>Selecteaza ingrediente:</label>
+    <div *ngFor="let ing of ingredients">
+      <label>
+        <input type="checkbox"
+               [checked]="isSelected(ing.id)"
+               (change)="toggleIngredient(ing.id)" />
+        {{ ing.nameIngredient }} ({{ ing.unit }}, {{ ing.caloriesPer100g }} cal/100g)
+      </label>
+    </div>
+  </div>
 
-  <table>
-    <thead>
-      <tr>
-        <th>Id</th>
-        <th>Nume</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr *ngFor="let u of utilizatori">
-        <td>{{ u.id }}</td>
-        <td>{{ u.userName }}</td>
-      </tr>
-    </tbody>
-  </table>
+  <button class="btn btn-primary"
+          (click)="addStep()"
+          [disabled]="!stepDescription.trim() || selectedIngredientIds.length === 0">
+    Adauga pas
+  </button>
 
-  ---- TEMPLATE POST (formular de adaugare) -------------------------
-  <form (ngSubmit)="createUser()">
-    <input name="userName" [(ngModel)]="newUser.userName" placeholder="Nume nou" required />
-    <button type="submit" class="btn btn-primary">Adauga</button>
-  </form>
+  <h3>Pasi adaugati:</h3>
+  <p *ngIf="steps.length === 0"><em>Niciun pas adaugat inca.</em></p>
+  <div *ngFor="let step of steps; let i = index" style="margin-bottom: 8px;">
+    <strong>Pasul {{ step.stepNumber }}:</strong> {{ step.descriptionStep }}
+    &mdash; Ingrediente: {{ getIngredientNames(step.ingredientIds) }}
+    <button (click)="removeStep(i)">Sterge</button>
+  </div>
 
-  ---- TEMPLATE PUT (formular de update dupa Id) --------------------
-  <form (ngSubmit)="updateUser()">
-    <input name="id" type="number" [(ngModel)]="editUser.id" placeholder="Id" />
-    <input name="userName" [(ngModel)]="editUser.userName" placeholder="Nume nou" />
-    <button type="submit" class="btn btn-primary">Salveaza</button>
-  </form>
-=====================================================================
--->
+  <br />
+  <button class="btn btn-primary" (click)="goToReview()" [disabled]="steps.length === 0">Finish</button>
+</div>
 
+<!-- ===== PAGE 3: REVIEW & CONFIRM ===== -->
+<div class="dashboard" *ngIf="currentPage === 3">
+  <h2>Pagina 3: Sumar reteta</h2>
+  <h3>{{ recipeTitle }}</h3>
+
+  <div *ngFor="let step of steps" style="margin-bottom: 8px;">
+    <strong>Pasul {{ step.stepNumber }}:</strong> {{ step.descriptionStep }}
+    <br />
+    <em>Ingrediente: {{ getIngredientNames(step.ingredientIds) }}</em>
+  </div>
+
+  <p><strong>Total calorii:</strong> {{ totalCalories }} cal</p>
+
+  <h4>Distributie grupe alimentare:</h4>
+  <ul>
+    <li *ngFor="let group of foodGroups">
+      {{ group.label }}: <strong>{{ group.count }}</strong> ingrediente
+    </li>
+  </ul>
+
+  <button class="btn btn-secondary" (click)="discardRecipe()">Discard</button>
+  &nbsp;
+  <button class="btn btn-primary" (click)="confirmRecipe()">Confirm</button>
+</div>
+
+<!-- ===== PAGE 4: RETETA SALVATA ===== -->
+<div class="dashboard" *ngIf="currentPage === 4">
+  <h2>Reteta salvata cu succes!</h2>
+  <h3>{{ recipeTitle }}</h3>
+
+  <div *ngFor="let step of steps" style="margin-bottom: 8px;">
+    <strong>Pasul {{ step.stepNumber }}:</strong> {{ step.descriptionStep }}
+    <br />
+    <em>Ingrediente: {{ getIngredientNames(step.ingredientIds) }}</em>
+  </div>
+
+  <p><strong>Total calorii:</strong> {{ totalCalories }} cal</p>
+
+  <button class="btn btn-danger" (click)="deleteRecipe()">Sterge reteta</button>
+  &nbsp;
+  <button class="btn btn-primary" (click)="newRecipe()">Reteta noua</button>
+</div>
